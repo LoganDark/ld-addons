@@ -42,6 +42,13 @@ if SERVER then
 			net.WriteEntity(ply)
 			net.WriteString(ply:SteamID())
 			net.Send(player.GetHumans())
+
+			-- if the server isn't dedicated, tell the new player to add
+			-- their own player_connect hook
+			if !game.IsDedicated() then
+				net.Start(NET_NOTDEDI)
+				net.Send(ply)
+			end
 		end
 	end)
 
