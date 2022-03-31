@@ -19,7 +19,7 @@ if SERVER then
 	if game.IsDedicated() then
 		hook.Add('player_connect', NET_JOIN, function(data)
 			net.Start(NET_JOIN)
-			net.WriteEntity(Entity(data.index))
+			net.WriteString(data.name)
 			net.WriteString(data.networkid)
 			net.Send(player.GetHumans())
 		end)
@@ -67,9 +67,10 @@ if CLIENT then
 	local GOOD_COLOR    = Color(0, 255, 0)
 	local STEAMID_COLOR = Color(255, 255, 255)
 
-	function logJoin(player, steamid)
+	function logJoin(username, steamid)
 		chat.AddText(
-			player,
+			GOOD_COLOR,
+			username,
 			LOG_COLOR,
 			' [',
 			STEAMID_COLOR,
@@ -81,6 +82,7 @@ if CLIENT then
 
 	function logLoaded(player, steamid)
 		chat.AddText(
+			GOOD_COLOR,
 			player,
 			LOG_COLOR,
 			' [',
@@ -111,7 +113,7 @@ if CLIENT then
 	-- this sends an event to the server as soon as the client loads
 	timer.Simple(0, function() net.Start(NET_LOADED) net.SendToServer() end)
 
-	net.Receive(NET_JOIN,   function() logJoin  (net.ReadEntity(), net.ReadString()) end)
+	net.Receive(NET_JOIN,   function() logJoin  (net.ReadString(), net.ReadString()) end)
 	net.Receive(NET_LOADED, function() logLoaded(net.ReadEntity(), net.ReadString()) end)
 	net.Receive(NET_LEFT,   function() logLeft  (net.ReadString(), net.ReadString()) end)
 
@@ -119,6 +121,6 @@ if CLIENT then
 		-- player_connect isn't called server-side on non-dedicated servers
 		gameevent.Listen('player_connect')
 
-		hook.Add('player_connect', NET_JOIN, function(data) logJoin(Entity(data.index), data.networkid) end)
+		hook.Add('player_connect', NET_JOIN, function(data) logJoin(data.name, data.networkid) end)
 	end)
 end
